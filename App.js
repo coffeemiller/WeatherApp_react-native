@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text, ScrollView, Dimensions } from "react-native";
+import * as Location from "expo-location";
 
 const { width:SCREEN_WIDTH } = Dimensions.get("window");
 // const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -7,6 +8,25 @@ const { width:SCREEN_WIDTH } = Dimensions.get("window");
 console.log(SCREEN_WIDTH);
 
 export default function App() {
+  const [city, setCity] = useState("Loading...");
+  
+  const [ok, setOk]= useState(true);
+  const getWeather = async() => {
+    // Permission
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+    if(!granted) {
+      setOk(false);
+    }
+    // User Info.
+    const {coords:{latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy: 5});
+    const location = await Location.reverseGeocodeAsync({latitude, longitude}, {useGoogleMaps: false});
+    console.log(location);
+    console.log(location[0].city);
+    setCity(location[0].city);
+  }
+  useEffect(() => {
+    getWeather();
+  }, [])
   return (
     // <View style={{ flexDirection:"row" }}>
     <View style={styles.container}>
@@ -14,7 +34,7 @@ export default function App() {
       <View style={{ flex:5, backgroundColor:"teal" }}></View> */}
       <View style={styles.city}>
         <View>
-          <Text style={styles.cityName}>Seoul</Text>
+          <Text style={styles.cityName}>{city}</Text>
         </View>
       </View>
       <ScrollView 
